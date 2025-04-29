@@ -1,0 +1,62 @@
+name: Update Colors from JSON
+
+on:
+  workflow_dispatch:  # Manual trigger
+
+jobs:
+  update-colors:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Install requirements
+        run: pip install json5
+
+      - name: Update Kotlin Color File
+        run: |
+          python3 <<EOF
+          import json5
+          import re
+
+          # Load JSON file
+          with open('path/to/your_colors.json', 'r') as f:
+              colors = json5.load(f)
+
+          # Read the Kotlin file
+          file_path = 'path/to/your/Colors.kt'
+          with open(file_path, 'r') as f:
+              kotlin_code = f.read()
+
+          # Replace the colors
+          def hex_to_kotlin(hex_value):
+              hex_value = hex_value.lstrip('#')
+              return f"Color(0xFF{hex_value.upper()})"
+
+          for key, hex_value in colors.items():
+              pattern = rf'(val\s+{key}\s*=\s*)Color\(0x[0-9A-Fa-f]+\)'
+              replacement = rf'\1{hex_to_kotlin(hex_value)}'
+              kotlin_code, count = re.subn(pattern, replacement, kotlin_code)
+              if count == 0:
+                  print(f"Warning: '{key}' not found in Kotlin file.")
+
+          # Save the updated Kotlin file
+          with open(file_path, 'w') as f:
+              f.write(kotlin_code)
+
+          print("✅ Colors updated successfully.")
+          EOF
+
+      - name: Commit and push changes
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add path/to/your/Colors.kt
+          git commit -m "Update Colors from JSON"
+          git push
