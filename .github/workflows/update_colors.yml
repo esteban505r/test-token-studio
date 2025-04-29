@@ -26,11 +26,11 @@ jobs:
           import re
 
           # Load JSON file
-          with open('path/to/your_colors.json', 'r') as f:
+          with open('tokens.json', 'r') as f:
               colors = json5.load(f)
 
           # Read the Kotlin file
-          file_path = 'path/to/your/Colors.kt'
+          file_path = 'capabilities/src/main/kotlin/com/mindstix/capabilities/presentation/theme/Colors.kt'
           with open(file_path, 'r') as f:
               kotlin_code = f.read()
 
@@ -57,6 +57,6 @@ jobs:
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
-          git add path/to/your/Colors.kt
+          git add capabilities/src/main/kotlin/com/mindstix/capabilities/presentation/theme/Colors.kt
           git commit -m "Update Colors from JSON"
           git push
