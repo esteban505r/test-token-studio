@@ -3,8 +3,8 @@ package com.example.tokentest.ui.theme
 import androidx.compose.ui.unit.sp
 
 // Auto-generated typography from tokens.json
-val FontSize0 = 56.sp
-val FontSize1 = 56.sp
+val FontSize0 = 48.sp
+val FontSize1 = 48.sp
 val FontSize10 = 18.sp
 val FontSize11 = 18.sp
 val FontSize12 = 18.sp
@@ -15,10 +15,10 @@ val FontSize16 = 14.sp
 val FontSize17 = 14.sp
 val FontSize18 = 12.sp
 val FontSize19 = 12.sp
-val FontSize2 = 42.sp
-val FontSize3 = 42.sp
-val FontSize4 = 28.sp
-val FontSize5 = 28.sp
+val FontSize2 = 34.sp
+val FontSize3 = 34.sp
+val FontSize4 = 20.sp
+val FontSize5 = 20.sp
 val FontSize6 = 28.sp
 val FontSize7 = 28.sp
 val FontSize8 = 24.sp
