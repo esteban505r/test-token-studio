@@ -68,32 +68,34 @@ jobs:
           
           # Extract spacing values
           spacing_values = {}
-          if 'Color & Spacing Tokens/Value' in tokens and 'space' in tokens['Color & Spacing Tokens/Value']:
-              space_tokens = tokens['Color & Spacing Tokens/Value']['space']
+          if 'Spacing/Mode 1' in tokens:
+              space_tokens = tokens['Spacing/Mode 1']
               for key, space_data in space_tokens.items():
                   if isinstance(space_data, dict) and 'value' in space_data:
-                      # Convert px values to dp (remove 'px' and keep the number)
-                      px_value = space_data['value'].replace('px', '')
-                      spacing_values[key] = px_value
+                      # Remove 'px' from key and use the numeric value
+                      clean_key = key.replace('px', '')
+                      spacing_values[clean_key] = str(space_data['value'])
           
           # Extract border radius values
           border_radius_values = {}
-          if 'Color & Spacing Tokens/Value' in tokens and 'border radius' in tokens['Color & Spacing Tokens/Value']:
-              border_tokens = tokens['Color & Spacing Tokens/Value']['border radius']
-              for key, border_data in border_tokens.items():
-                  if isinstance(border_data, dict) and 'value' in border_data:
-                      px_value = border_data['value'].replace('px', '')
-                      border_radius_values[key] = px_value
+          if 'Border radius/Mode 1' in tokens:
+              border_tokens = tokens['Border radius/Mode 1']
+              for key, token in border_tokens.items():
+                  if isinstance(token, dict) and 'value' in token:
+                      # Convert to dp for Android
+                      value = int(token['value'])
+                      border_radius_values[key] = value
           
           # Extract color variations
           color_variations = {}
-          if 'Color & Spacing Tokens/Value' in tokens and 'color' in tokens['Color & Spacing Tokens/Value']:
-              color_tokens = tokens['Color & Spacing Tokens/Value']['color']
+          if 'Colors/Mode 1' in tokens:
+              color_tokens = tokens['Colors/Mode 1']
               for color_group, shades in color_tokens.items():
-                  for shade, color_data in shades.items():
-                      if isinstance(color_data, dict) and 'value' in color_data:
-                          key = f"{color_group}_{shade}"
-                          color_variations[key] = color_data['value']
+                  if isinstance(shades, dict):
+                      for shade, color_data in shades.items():
+                          if isinstance(color_data, dict) and 'value' in color_data:
+                              key = f"{color_group}_{shade}"
+                              color_variations[key] = color_data['value']
           
           # Extract typography values
           font_sizes = {}
@@ -137,20 +139,19 @@ jobs:
           radius_content += "import androidx.compose.ui.unit.dp\n\n"
           radius_content += "// Auto-generated border radius from tokens.json\n"
           
-          radius_names = {
-              "xsm": "ExtraSmall",
-              "sm": "Small", 
-              "md": "Medium",
-              "lg": "Large",
-              "xl": "ExtraLarge",
-              "2xl": "XXLarge",
-              "3xl": "XXXLarge"
-          }
-          
-          for key, dp_value in border_radius_values.items():
-              if key in radius_names:
-                  name = radius_names[key]
-                  radius_content += "val BorderRadius" + name + " = " + dp_value + ".dp\n"
+          # Map the available border radius values to meaningful names
+          if border_radius_values:
+              if "standard" in border_radius_values:
+                  standard_value = border_radius_values["standard"]
+                  radius_content += f"val BorderRadiusSmall = {standard_value // 2}.dp\n"
+                  radius_content += f"val BorderRadiusMedium = {standard_value}.dp\n"
+                  radius_content += f"val BorderRadiusLarge = {standard_value * 2}.dp\n"
+              
+              # Add any other border radius values directly
+              for key, dp_value in border_radius_values.items():
+                  if key != "standard":  # Skip standard as we've already handled it
+                      safe_name = key.replace("-", "").replace("_", "").capitalize()
+                      radius_content += f"val BorderRadius{safe_name} = {dp_value}.dp\n"
           
           # Write border radius file
           with open('app/src/main/java/com/example/tokentest/ui/theme/BorderRadius.kt', 'w') as f:
@@ -185,17 +186,18 @@ jobs:
           # Add spacing constants
           spacing_names = {
               "0": "None",
-              "50": "XXS", 
-              "100": "XS",
-              "150": "SM",
-              "200": "MD", 
-              "300": "LG",
-              "400": "XL",
-              "500": "XXL",
-              "600": "XXXL",
-              "800": "Giant",
-              "1000": "Huge",
-              "1200": "Massive"
+              "2": "XXS", 
+              "4": "XS",
+              "8": "SM",
+              "12": "MD", 
+              "16": "LG",
+              "20": "XL",
+              "24": "XXL",
+              "32": "XXXL",
+              "40": "Giant",
+              "48": "Huge",
+              "56": "Massive",
+              "64": "Epic"
           }
           
           for key, dp_value in spacing_values.items():
@@ -204,8 +206,8 @@ jobs:
                   spacing_content += "val Spacing" + name + " = " + dp_value + ".dp\n"
           
           spacing_content += "\n// Common spacing shortcuts\n"
-          spacing_content += "val PaddingSmall = SpacingMD\n"
-          spacing_content += "val PaddingMedium = SpacingXL\n" 
+          spacing_content += "val PaddingSmall = SpacingSM\n"
+          spacing_content += "val PaddingMedium = SpacingLG\n" 
           spacing_content += "val PaddingLarge = SpacingXXL\n"
           
           # Write spacing file
