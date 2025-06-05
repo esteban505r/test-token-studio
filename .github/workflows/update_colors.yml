@@ -128,33 +128,33 @@ jobs:
                   theme_content = f.read()
 
               # Update the color scheme definitions
-              light_scheme_replacement = f"""private val LightColorScheme = lightColorScheme(
-    primary = Primary,
-    secondary = Secondary,
-    tertiary = Tertiary,
-    surface = Surface,
-    surfaceVariant = SurfaceVariant,
-    background = Surface,
-    onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = TextPrimary,
-    onSurface = TextPrimary
-)"""
+              light_scheme_replacement = 'private val LightColorScheme = lightColorScheme(\n'
+              light_scheme_replacement += '    primary = Primary,\n'
+              light_scheme_replacement += '    secondary = Secondary,\n'
+              light_scheme_replacement += '    tertiary = Tertiary,\n'
+              light_scheme_replacement += '    surface = Surface,\n'
+              light_scheme_replacement += '    surfaceVariant = SurfaceVariant,\n'
+              light_scheme_replacement += '    background = Surface,\n'
+              light_scheme_replacement += '    onPrimary = Color.White,\n'
+              light_scheme_replacement += '    onSecondary = Color.White,\n'
+              light_scheme_replacement += '    onTertiary = Color.White,\n'
+              light_scheme_replacement += '    onBackground = TextPrimary,\n'
+              light_scheme_replacement += '    onSurface = TextPrimary\n'
+              light_scheme_replacement += ')'
 
-              dark_scheme_replacement = f"""private val DarkColorScheme = darkColorScheme(
-    primary = Primary,
-    secondary = Secondary,
-    tertiary = Tertiary,
-    surface = GrayN1000,
-    surfaceVariant = GrayN700,
-    background = GrayN1000,
-    onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color.White,
-    onSurface = Color.White
-)"""
+              dark_scheme_replacement = 'private val DarkColorScheme = darkColorScheme(\n'
+              dark_scheme_replacement += '    primary = Primary,\n'
+              dark_scheme_replacement += '    secondary = Secondary,\n'
+              dark_scheme_replacement += '    tertiary = Tertiary,\n'
+              dark_scheme_replacement += '    surface = GrayN1000,\n'
+              dark_scheme_replacement += '    surfaceVariant = GrayN700,\n'
+              dark_scheme_replacement += '    background = GrayN1000,\n'
+              dark_scheme_replacement += '    onPrimary = Color.White,\n'
+              dark_scheme_replacement += '    onSecondary = Color.White,\n'
+              dark_scheme_replacement += '    onTertiary = Color.White,\n'
+              dark_scheme_replacement += '    onBackground = Color.White,\n'
+              dark_scheme_replacement += '    onSurface = Color.White\n'
+              dark_scheme_replacement += ')'
 
               # Replace the existing color schemes
               theme_content = re.sub(
