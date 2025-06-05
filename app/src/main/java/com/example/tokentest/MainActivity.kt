@@ -57,13 +57,22 @@ import com.example.tokentest.ui.theme.Green200
 import com.example.tokentest.ui.theme.Green600
 import com.example.tokentest.ui.theme.Red200
 import com.example.tokentest.ui.theme.Red500
+import android.util.Log
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        
+        // Log app startup and initial token values
+        Log.d("AppStartup", "🚀 TokenTest App Starting...")
+        Log.d("AppStartup", "📱 Current timestamp: ${System.currentTimeMillis()}")
+        
         enableEdgeToEdge()
         setContent {
             TokenTestTheme {
+                // Log when theme is applied
+                Log.d("AppStartup", "🎨 TokenTestTheme applied")
+                
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     DesignSystemShowcase(
                         modifier = Modifier.padding(innerPadding)
@@ -71,11 +80,65 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+        
+        Log.d("AppStartup", "✅ MainActivity onCreate completed")
     }
 }
 
 @Composable
 fun DesignSystemShowcase(modifier: Modifier = Modifier) {
+    // Log all current token values for comparison
+    Log.d("DesignTokens", "=== CURRENT DESIGN TOKENS ===")
+    
+    // Log Colors
+    Log.d("DesignTokens", "🎨 COLORS:")
+    Log.d("DesignTokens", "  Primary: $Primary")
+    Log.d("DesignTokens", "  Secondary: $Secondary")
+    Log.d("DesignTokens", "  ErrorColor: $ErrorColor")
+    Log.d("DesignTokens", "  Surface: $Surface")
+    Log.d("DesignTokens", "  Background: $Background")
+    
+    // Log Spacing
+    Log.d("DesignTokens", "📏 SPACING:")
+    Log.d("DesignTokens", "  PaddingSmall: $PaddingSmall")
+    Log.d("DesignTokens", "  PaddingMedium: $PaddingMedium")
+    Log.d("DesignTokens", "  PaddingLarge: $PaddingLarge")
+    
+    // Log Border Radius (with try-catch in case they don't exist yet)
+    try {
+        Log.d("DesignTokens", "📐 BORDER RADIUS:")
+        Log.d("DesignTokens", "  BorderRadiusSmall: $BorderRadiusSmall")
+        Log.d("DesignTokens", "  BorderRadiusMedium: $BorderRadiusMedium")
+        Log.d("DesignTokens", "  BorderRadiusLarge: $BorderRadiusLarge")
+    } catch (e: Exception) {
+        Log.d("DesignTokens", "📐 BORDER RADIUS: Not yet generated")
+    }
+    
+    // Log Typography (with try-catch in case they don't exist yet)
+    try {
+        Log.d("DesignTokens", "🔤 TYPOGRAPHY:")
+        Log.d("DesignTokens", "  HeadingLarge: $HeadingLarge")
+        Log.d("DesignTokens", "  HeadingMedium: $HeadingMedium")
+        Log.d("DesignTokens", "  BodyLarge: $BodyLarge")
+    } catch (e: Exception) {
+        Log.d("DesignTokens", "🔤 TYPOGRAPHY: Not yet generated")
+    }
+    
+    // Log Color Variations (with try-catch in case they don't exist yet)
+    try {
+        Log.d("DesignTokens", "🌈 COLOR VARIATIONS:")
+        Log.d("DesignTokens", "  Purple50: $Purple50")
+        Log.d("DesignTokens", "  Purple500: $Purple500")
+        Log.d("DesignTokens", "  Green200: $Green200")
+        Log.d("DesignTokens", "  Green600: $Green600")
+        Log.d("DesignTokens", "  Red200: $Red200")
+        Log.d("DesignTokens", "  Red500: $Red500")
+    } catch (e: Exception) {
+        Log.d("DesignTokens", "🌈 COLOR VARIATIONS: Not yet generated")
+    }
+    
+    Log.d("DesignTokens", "=== END DESIGN TOKENS ===")
+
     LazyColumn(
         modifier = modifier
             .fillMaxSize()
@@ -138,6 +201,12 @@ fun DesignSystemShowcase(modifier: Modifier = Modifier) {
 
 @Composable
 fun ColorPaletteSection() {
+    // Log color palette details
+    Log.d("ColorPalette", "🎨 Color Palette Section Loading:")
+    Log.d("ColorPalette", "  Primary RGB: ${Primary.red}, ${Primary.green}, ${Primary.blue}, ${Primary.alpha}")
+    Log.d("ColorPalette", "  Secondary RGB: ${Secondary.red}, ${Secondary.green}, ${Secondary.blue}, ${Secondary.alpha}")
+    Log.d("ColorPalette", "  Error RGB: ${ErrorColor.red}, ${ErrorColor.green}, ${ErrorColor.blue}, ${ErrorColor.alpha}")
+    
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = Surface)
@@ -196,6 +265,12 @@ fun ColorSwatch(name: String, color: Color) {
 
 @Composable
 fun SpacingShowcaseSection() {
+    // Log spacing details
+    Log.d("Spacing", "📏 Spacing Section Loading:")
+    Log.d("Spacing", "  PaddingSmall value: ${PaddingSmall.value}dp")
+    Log.d("Spacing", "  PaddingMedium value: ${PaddingMedium.value}dp")
+    Log.d("Spacing", "  PaddingLarge value: ${PaddingLarge.value}dp")
+    
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = Surface)
@@ -314,6 +389,16 @@ fun SpacingDemo(label: String, padding: androidx.compose.ui.unit.Dp, color: Colo
 
 @Composable
 fun BorderRadiusShowcaseSection() {
+    // Log border radius details
+    try {
+        Log.d("BorderRadius", "📐 Border Radius Section Loading:")
+        Log.d("BorderRadius", "  BorderRadiusSmall value: ${BorderRadiusSmall.value}dp")
+        Log.d("BorderRadius", "  BorderRadiusMedium value: ${BorderRadiusMedium.value}dp")
+        Log.d("BorderRadius", "  BorderRadiusLarge value: ${BorderRadiusLarge.value}dp")
+    } catch (e: Exception) {
+        Log.d("BorderRadius", "📐 Border Radius values not yet available: ${e.message}")
+    }
+    
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = Surface)
@@ -476,6 +561,19 @@ fun TypographyShowcaseSection() {
 
 @Composable
 fun ColorVariationsSection() {
+    // Log color variations details
+    try {
+        Log.d("ColorVariations", "🌈 Color Variations Section Loading:")
+        Log.d("ColorVariations", "  Purple50: $Purple50")
+        Log.d("ColorVariations", "  Purple500: $Purple500")
+        Log.d("ColorVariations", "  Green200: $Green200")
+        Log.d("ColorVariations", "  Green600: $Green600")
+        Log.d("ColorVariations", "  Red200: $Red200")
+        Log.d("ColorVariations", "  Red500: $Red500")
+    } catch (e: Exception) {
+        Log.d("ColorVariations", "🌈 Color variations not yet available: ${e.message}")
+    }
+    
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = Surface)
