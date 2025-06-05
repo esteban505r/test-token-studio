@@ -66,6 +66,16 @@ jobs:
               if 'Text' in global_tokens and 'text-error' in global_tokens['Text']:
                   error_color = global_tokens['Text']['text-error']['value']
           
+          # Extract spacing values
+          spacing_values = {}
+          if 'Color & Spacing Tokens/Value' in tokens and 'space' in tokens['Color & Spacing Tokens/Value']:
+              space_tokens = tokens['Color & Spacing Tokens/Value']['space']
+              for key, space_data in space_tokens.items():
+                  if isinstance(space_data, dict) and 'value' in space_data:
+                      # Convert px values to dp (remove 'px' and keep the number)
+                      px_value = space_data['value'].replace('px', '')
+                      spacing_values[key] = px_value
+          
           # Create simple color file
           color_content = "package com.example.tokentest.ui.theme\n\n"
           color_content += "import androidx.compose.ui.graphics.Color\n\n"
@@ -87,7 +97,43 @@ jobs:
           with open('app/src/main/java/com/example/tokentest/ui/theme/Color.kt', 'w') as f:
               f.write(color_content)
           
-          print("✅ Updated colors successfully!")
+          # Create spacing file
+          spacing_content = "package com.example.tokentest.ui.theme\n\n"
+          spacing_content += "import androidx.compose.ui.unit.dp\n\n"
+          spacing_content += "// Auto-generated spacing from tokens.json\n"
+          
+          # Add spacing constants
+          spacing_names = {
+              "0": "None",
+              "50": "XXS", 
+              "100": "XS",
+              "150": "SM",
+              "200": "MD", 
+              "300": "LG",
+              "400": "XL",
+              "500": "XXL",
+              "600": "XXXL",
+              "800": "Giant",
+              "1000": "Huge",
+              "1200": "Massive"
+          }
+          
+          for key, dp_value in spacing_values.items():
+              if key in spacing_names:
+                  name = spacing_names[key]
+                  spacing_content += "val Spacing" + name + " = " + dp_value + ".dp\n"
+          
+          spacing_content += "\n// Common spacing shortcuts\n"
+          spacing_content += "val PaddingSmall = SpacingMD\n"
+          spacing_content += "val PaddingMedium = SpacingXL\n" 
+          spacing_content += "val PaddingLarge = SpacingXXL\n"
+          
+          # Write spacing file
+          with open('app/src/main/java/com/example/tokentest/ui/theme/Spacing.kt', 'w') as f:
+              f.write(spacing_content)
+          
+          print("✅ Updated colors and spacing successfully!")
+          print(f"📏 Found {len(spacing_values)} spacing tokens")
           EOF
 
       - name: Commit changes
@@ -95,9 +141,10 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add app/src/main/java/com/example/tokentest/ui/theme/Color.kt
+          git add app/src/main/java/com/example/tokentest/ui/theme/Spacing.kt
           if git diff --staged --quiet; then
             echo "No changes to commit"
           else
-            git commit -m "🎨 Update primary colors from tokens.json"
+            git commit -m "🎨 Update primary colors and spacing from tokens.json"
             git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git HEAD:${{ github.ref_name }}
           fi
