@@ -45,6 +45,18 @@ import com.example.tokentest.ui.theme.Background
 import com.example.tokentest.ui.theme.PaddingSmall
 import com.example.tokentest.ui.theme.PaddingMedium
 import com.example.tokentest.ui.theme.PaddingLarge
+import com.example.tokentest.ui.theme.BorderRadiusSmall
+import com.example.tokentest.ui.theme.BorderRadiusMedium
+import com.example.tokentest.ui.theme.BorderRadiusLarge
+import com.example.tokentest.ui.theme.HeadingLarge
+import com.example.tokentest.ui.theme.HeadingMedium
+import com.example.tokentest.ui.theme.BodyLarge
+import com.example.tokentest.ui.theme.Purple50
+import com.example.tokentest.ui.theme.Purple500
+import com.example.tokentest.ui.theme.Green200
+import com.example.tokentest.ui.theme.Green600
+import com.example.tokentest.ui.theme.Red200
+import com.example.tokentest.ui.theme.Red500
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -92,6 +104,18 @@ fun DesignSystemShowcase(modifier: Modifier = Modifier) {
 
         item {
             SpacingShowcaseSection()
+        }
+
+        item {
+            BorderRadiusShowcaseSection()
+        }
+
+        item {
+            TypographyShowcaseSection()
+        }
+
+        item {
+            ColorVariationsSection()
         }
 
         item {
@@ -284,6 +308,255 @@ fun SpacingDemo(label: String, padding: androidx.compose.ui.unit.Dp, color: Colo
             text = "${padding}",
             fontSize = 8.sp,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+        )
+    }
+}
+
+@Composable
+fun BorderRadiusShowcaseSection() {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = Surface)
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp)
+        ) {
+            Text(
+                text = "Border Radius Showcase",
+                fontSize = 18.sp,
+                fontWeight = FontWeight.SemiBold,
+                modifier = Modifier.padding(bottom = 12.dp)
+            )
+            
+            Text(
+                text = "Border radius values from tokens.json:",
+                fontSize = 14.sp,
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+            
+            // Small border radius example
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 8.dp),
+                colors = CardDefaults.cardColors(containerColor = Primary.copy(alpha = 0.1f))
+            ) {
+                Text(
+                    text = "Small Border Radius (${BorderRadiusSmall})",
+                    modifier = Modifier.padding(PaddingSmall),
+                    color = Primary,
+                    fontWeight = FontWeight.Medium
+                )
+            }
+            
+            // Medium border radius example
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 8.dp),
+                colors = CardDefaults.cardColors(containerColor = Secondary.copy(alpha = 0.1f))
+            ) {
+                Text(
+                    text = "Medium Border Radius (${BorderRadiusMedium})",
+                    modifier = Modifier.padding(PaddingMedium),
+                    color = Secondary,
+                    fontWeight = FontWeight.Medium
+                )
+            }
+            
+            // Large border radius example
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = ErrorColor.copy(alpha = 0.1f))
+            ) {
+                Text(
+                    text = "Large Border Radius (${BorderRadiusLarge})",
+                    modifier = Modifier.padding(PaddingLarge),
+                    color = ErrorColor,
+                    fontWeight = FontWeight.Medium
+                )
+            }
+            
+            Spacer(modifier = Modifier.height(12.dp))
+            
+            // Visual border radius comparison
+            Text(
+                text = "Visual Border Radius Comparison:",
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Medium,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+            
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                BorderRadiusDemo("Small", BorderRadiusSmall, Primary)
+                BorderRadiusDemo("Medium", BorderRadiusMedium, Secondary)
+                BorderRadiusDemo("Large", BorderRadiusLarge, ErrorColor)
+            }
+        }
+    }
+}
+
+@Composable
+fun BorderRadiusDemo(label: String, borderRadius: androidx.compose.ui.unit.Dp, color: Color) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Box(
+            modifier = Modifier
+                .background(color.copy(alpha = 0.2f), RoundedCornerShape(4.dp))
+        ) {
+            Box(
+                modifier = Modifier
+                    .padding(borderRadius)
+                    .size(24.dp)
+                    .background(color, RoundedCornerShape(4.dp))
+            )
+        }
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(
+            text = label,
+            fontSize = 10.sp,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        Text(
+            text = "${borderRadius}",
+            fontSize = 8.sp,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+        )
+    }
+}
+
+@Composable
+fun TypographyShowcaseSection() {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = Surface)
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp)
+        ) {
+            Text(
+                text = "Typography",
+                fontSize = 18.sp,
+                fontWeight = FontWeight.SemiBold,
+                modifier = Modifier.padding(bottom = 12.dp)
+            )
+            
+            Text(
+                text = "Primary Text",
+                color = Primary,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Medium
+            )
+            
+            Text(
+                text = "Secondary Text",
+                color = Secondary,
+                fontSize = 14.sp
+            )
+            
+            Text(
+                text = "Error Text",
+                color = ErrorColor,
+                fontSize = 14.sp
+            )
+            
+            Text(
+                text = "Surface Text on Background",
+                color = MaterialTheme.colorScheme.onSurface,
+                fontSize = 14.sp
+            )
+        }
+    }
+}
+
+@Composable
+fun ColorVariationsSection() {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = Surface)
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp)
+        ) {
+            Text(
+                text = "Color Variations",
+                fontSize = 18.sp,
+                fontWeight = FontWeight.SemiBold,
+                modifier = Modifier.padding(bottom = 12.dp)
+            )
+            
+            Text(
+                text = "Purple Variations",
+                fontSize = 14.sp,
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+            
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                ColorVariation("Purple 50", Purple50)
+                ColorVariation("Purple 500", Purple500)
+            }
+            
+            Spacer(modifier = Modifier.height(12.dp))
+            
+            Text(
+                text = "Green Variations",
+                fontSize = 14.sp,
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+            
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                ColorVariation("Green 200", Green200)
+                ColorVariation("Green 600", Green600)
+            }
+            
+            Spacer(modifier = Modifier.height(12.dp))
+            
+            Text(
+                text = "Red Variations",
+                fontSize = 14.sp,
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+            
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                ColorVariation("Red 200", Red200)
+                ColorVariation("Red 500", Red500)
+            }
+        }
+    }
+}
+
+@Composable
+fun ColorVariation(name: String, color: Color) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Box(
+            modifier = Modifier
+                .size(60.dp)
+                .background(color, RoundedCornerShape(8.dp))
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(
+            text = name,
+            fontSize = 12.sp,
+            color = MaterialTheme.colorScheme.onSurface
         )
     }
 }
