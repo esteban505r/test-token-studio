@@ -27,18 +27,18 @@ jobs:
           python3 << 'EOF'
           import json5
           import os
-
+          
           # Load tokens
           with open('tokens.json', 'r') as f:
               tokens = json5.load(f)
-
+          
           # Extract basic colors
           primary_color = "#7d4dbe"
           secondary_color = "#6436ab" 
           error_color = "#e1251b"
           surface_color = "#ffffff"
           background_color = "#f6f6f6"
-
+          
           if 'global' in tokens:
               global_tokens = tokens['global']
               
@@ -60,7 +60,7 @@ jobs:
               # Get error color
               if 'Text' in global_tokens and 'text-error' in global_tokens['Text']:
                   error_color = global_tokens['Text']['text-error']['value']
-
+          
           # Create simple color file
           color_content = "package com.example.tokentest.ui.theme\n\n"
           color_content += "import androidx.compose.ui.graphics.Color\n\n"
@@ -77,11 +77,11 @@ jobs:
           color_content += "val Purple40 = Primary\n"
           color_content += "val PurpleGrey40 = Secondary\n"
           color_content += "val Pink40 = ErrorColor\n"
-
+          
           # Write color file
           with open('app/src/main/java/com/example/tokentest/ui/theme/Color.kt', 'w') as f:
               f.write(color_content)
-
+          
           print("✅ Updated colors successfully!")
           EOF
 
