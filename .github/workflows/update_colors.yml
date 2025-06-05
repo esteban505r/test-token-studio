@@ -188,8 +188,6 @@ jobs:
           if git diff --staged --quiet; then
             echo "No changes to commit"
           else
-            git commit -m "🎨 Update MaterialTheme colors from tokens.json
-
-            Auto-generated color definitions and theme updates based on design tokens."
+            git commit -m "🎨 Update MaterialTheme colors from tokens.json - Auto-generated color definitions and theme updates based on design tokens."
             git push
           fi
