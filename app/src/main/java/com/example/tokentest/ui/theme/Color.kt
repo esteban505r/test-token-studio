@@ -3,11 +3,11 @@ package com.example.tokentest.ui.theme
 import androidx.compose.ui.graphics.Color
 
 // Auto-generated from tokens.json
-val Primary = Color(0xFF7d4dbe)
-val Secondary = Color(0xFF6436ab)
-val ErrorColor = Color(0xFFe1251b)
+val Primary = Color(0xFFff6b35)
+val Secondary = Color(0xFFe55a2b)
+val ErrorColor = Color(0xFFff1493)
 val Surface = Color(0xFFffffff)
-val Background = Color(0xFFf6f6f6)
+val Background = Color(0xFFfff4e6)
 
 // Legacy colors for compatibility
 val Purple80 = Color(0xFFD0BCFF)
