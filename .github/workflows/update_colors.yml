@@ -3,11 +3,11 @@ name: Update MaterialTheme from Tokens
 on:
   push:
     branches: [main, master]
-    paths: ['tokens.json']  # Only trigger when tokens.json changes
-  workflow_dispatch:  # Still allow manual trigger
+    paths: ['tokens.json']
+  workflow_dispatch:
 
 jobs:
-  update-material-theme:
+  update-theme:
     runs-on: ubuntu-latest
 
     steps:
@@ -22,172 +22,81 @@ jobs:
       - name: Install requirements
         run: pip install json5
 
-      - name: Update MaterialTheme Colors
+      - name: Update Colors and Spacing
         run: |
-          python3 <<'EOF'
+          python3 << 'EOF'
           import json5
-          import re
           import os
 
-          # Load tokens.json file
+          # Load tokens
           with open('tokens.json', 'r') as f:
               tokens = json5.load(f)
 
-          # Extract colors from tokens structure
-          def extract_colors(obj, path=""):
-              colors = {}
-              if isinstance(obj, dict):
-                  for key, value in obj.items():
-                      current_path = f"{path}_{key}" if path else key
-                      if isinstance(value, dict):
-                          if "value" in value and "type" in value and value["type"] == "color":
-                              # This is a color token
-                              colors[current_path.replace("-", "_")] = value["value"]
-                          else:
-                              # Recurse deeper
-                              colors.update(extract_colors(value, current_path))
-              return colors
+          # Extract basic colors
+          primary_color = "#7d4dbe"
+          secondary_color = "#6436ab" 
+          error_color = "#e1251b"
+          surface_color = "#ffffff"
+          background_color = "#f6f6f6"
 
-          # Extract all color tokens
-          all_colors = {}
-          if "global" in tokens:
-              all_colors.update(extract_colors(tokens["global"]))
-          if "Color & Spacing Tokens/Value" in tokens and "color" in tokens["Color & Spacing Tokens/Value"]:
-              color_tokens = tokens["Color & Spacing Tokens/Value"]["color"]
-              for color_group, shades in color_tokens.items():
-                  for shade, color_data in shades.items():
-                      if isinstance(color_data, dict) and "value" in color_data:
-                          key = f"{color_group}_{shade}".replace("-", "_")
-                          all_colors[key] = color_data["value"]
-
-          # Function to convert hex to Kotlin Color
-          def hex_to_kotlin(hex_value):
-              hex_value = hex_value.lstrip('#')
-              if len(hex_value) == 6:
-                  return f"Color(0xFF{hex_value.upper()})"
-              return hex_value
-
-          # Update Color.kt file
-          color_file_path = 'app/src/main/java/com/example/tokentest/ui/theme/Color.kt'
-          
-          # Create a comprehensive color definitions file
-          color_definitions = []
-          color_definitions.append("package com.example.tokentest.ui.theme")
-          color_definitions.append("")
-          color_definitions.append("import androidx.compose.ui.graphics.Color")
-          color_definitions.append("")
-          color_definitions.append("// Auto-generated colors from tokens.json")
-          color_definitions.append("")
-
-          # Add primary colors from global tokens
-          primary_color = "#7d4dbe"  # Default from tokens
-          secondary_color = "#6436ab"  # Default from tokens
-          tertiary_color = "#e1251b"  # Default from tokens
-          
-          if "Background_section_primary" in all_colors:
-              primary_color = all_colors["Background_section_primary"]
-          if "Button_primary_hover_bg" in all_colors:
-              secondary_color = all_colors["Button_primary_hover_bg"]
-          if "Text_text_error" in all_colors:
-              tertiary_color = all_colors["Text_text_error"]
-
-          # Material 3 color scheme colors
-          color_definitions.append(f"// Material 3 Primary Colors")
-          color_definitions.append(f"val Primary = {hex_to_kotlin(primary_color)}")
-          color_definitions.append(f"val Secondary = {hex_to_kotlin(secondary_color)}")  
-          color_definitions.append(f"val Tertiary = {hex_to_kotlin(tertiary_color)}")
-          color_definitions.append("")
-
-          # Background colors
-          if "Background_surface_default" in all_colors:
-              color_definitions.append(f"val Surface = {hex_to_kotlin(all_colors['Background_surface_default'])}")
-          if "Background_surface_alt" in all_colors:
-              color_definitions.append(f"val SurfaceVariant = {hex_to_kotlin(all_colors['Background_surface_alt'])}")
-          
-          color_definitions.append("")
-          color_definitions.append("// Token-based colors")
-          
-          # Add all extracted colors as individual definitions
-          for color_name, hex_value in sorted(all_colors.items()):
-              safe_name = color_name.replace("-", "_").replace(".", "_")
-              # Capitalize first letter for Kotlin naming convention
-              safe_name = ''.join(word.capitalize() for word in safe_name.split('_'))
-              color_definitions.append(f"val {safe_name} = {hex_to_kotlin(hex_value)}")
-
-          # Write the new color file
-          with open(color_file_path, 'w') as f:
-              f.write('\n'.join(color_definitions))
-
-          print(f"✅ Updated {color_file_path} with {len(all_colors)} colors")
-
-          # Update Theme.kt to use the new colors
-          theme_file_path = 'app/src/main/java/com/example/tokentest/ui/theme/Theme.kt'
-          
-          if os.path.exists(theme_file_path):
-              with open(theme_file_path, 'r') as f:
-                  theme_content = f.read()
-
-              # Update the color scheme definitions
-              light_scheme_replacement = 'private val LightColorScheme = lightColorScheme(\n'
-              light_scheme_replacement += '    primary = Primary,\n'
-              light_scheme_replacement += '    secondary = Secondary,\n'
-              light_scheme_replacement += '    tertiary = Tertiary,\n'
-              light_scheme_replacement += '    surface = Surface,\n'
-              light_scheme_replacement += '    surfaceVariant = SurfaceVariant,\n'
-              light_scheme_replacement += '    background = Surface,\n'
-              light_scheme_replacement += '    onPrimary = Color.White,\n'
-              light_scheme_replacement += '    onSecondary = Color.White,\n'
-              light_scheme_replacement += '    onTertiary = Color.White,\n'
-              light_scheme_replacement += '    onBackground = TextPrimary,\n'
-              light_scheme_replacement += '    onSurface = TextPrimary\n'
-              light_scheme_replacement += ')'
-
-              dark_scheme_replacement = 'private val DarkColorScheme = darkColorScheme(\n'
-              dark_scheme_replacement += '    primary = Primary,\n'
-              dark_scheme_replacement += '    secondary = Secondary,\n'
-              dark_scheme_replacement += '    tertiary = Tertiary,\n'
-              dark_scheme_replacement += '    surface = GrayN1000,\n'
-              dark_scheme_replacement += '    surfaceVariant = GrayN700,\n'
-              dark_scheme_replacement += '    background = GrayN1000,\n'
-              dark_scheme_replacement += '    onPrimary = Color.White,\n'
-              dark_scheme_replacement += '    onSecondary = Color.White,\n'
-              dark_scheme_replacement += '    onTertiary = Color.White,\n'
-              dark_scheme_replacement += '    onBackground = Color.White,\n'
-              dark_scheme_replacement += '    onSurface = Color.White\n'
-              dark_scheme_replacement += ')'
-
-              # Replace the existing color schemes
-              theme_content = re.sub(
-                  r'private val LightColorScheme = lightColorScheme\([^)]*\)',
-                  light_scheme_replacement,
-                  theme_content,
-                  flags=re.DOTALL
-              )
+          if 'global' in tokens:
+              global_tokens = tokens['global']
               
-              theme_content = re.sub(
-                  r'private val DarkColorScheme = darkColorScheme\([^)]*\)',
-                  dark_scheme_replacement,
-                  theme_content,
-                  flags=re.DOTALL
-              )
+              # Get primary colors
+              if 'Background' in global_tokens and 'section-primary' in global_tokens['Background']:
+                  primary_color = global_tokens['Background']['section-primary']['value']
+              
+              if 'Button' in global_tokens and 'primary' in global_tokens['Button']:
+                  if 'hover-bg' in global_tokens['Button']['primary']:
+                      secondary_color = global_tokens['Button']['primary']['hover-bg']['value']
+              
+              # Get surface colors
+              if 'Background' in global_tokens:
+                  if 'surface-default' in global_tokens['Background']:
+                      surface_color = global_tokens['Background']['surface-default']['value']
+                  if 'surface-alt' in global_tokens['Background']:
+                      background_color = global_tokens['Background']['surface-alt']['value']
+              
+              # Get error color
+              if 'Text' in global_tokens and 'text-error' in global_tokens['Text']:
+                  error_color = global_tokens['Text']['text-error']['value']
 
-              with open(theme_file_path, 'w') as f:
-                  f.write(theme_content)
+          # Create simple color file
+          color_content = '''package com.example.tokentest.ui.theme
 
-              print(f"✅ Updated {theme_file_path} with new color scheme")
+import androidx.compose.ui.graphics.Color
 
-          print("🎨 MaterialTheme colors updated successfully from tokens.json!")
+// Auto-generated from tokens.json
+val Primary = Color(0xFF''' + primary_color.replace('#', '') + ''')
+val Secondary = Color(0xFF''' + secondary_color.replace('#', '') + ''')
+val ErrorColor = Color(0xFF''' + error_color.replace('#', '') + ''')
+val Surface = Color(0xFF''' + surface_color.replace('#', '') + ''')
+val Background = Color(0xFF''' + background_color.replace('#', '') + ''')
+
+// Legacy colors for compatibility
+val Purple80 = Color(0xFFD0BCFF)
+val PurpleGrey80 = Color(0xFFCCC2DC)
+val Pink80 = Color(0xFFEFB8C8)
+val Purple40 = Primary
+val PurpleGrey40 = Secondary
+val Pink40 = ErrorColor
+'''
+
+          # Write color file
+          with open('app/src/main/java/com/example/tokentest/ui/theme/Color.kt', 'w') as f:
+              f.write(color_content)
+
+          print("✅ Updated colors successfully!")
           EOF
 
-      - name: Commit and push changes
+      - name: Commit changes
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add app/src/main/java/com/example/tokentest/ui/theme/Color.kt
-          git add app/src/main/java/com/example/tokentest/ui/theme/Theme.kt
           if git diff --staged --quiet; then
             echo "No changes to commit"
           else
-            git commit -m "🎨 Update MaterialTheme colors from tokens.json - Auto-generated color definitions and theme updates based on design tokens."
+            git commit -m "🎨 Update primary colors from tokens.json"
             git push
           fi
