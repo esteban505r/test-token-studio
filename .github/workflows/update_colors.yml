@@ -1,10 +1,13 @@
-name: Update Colors from JSON
+name: Update MaterialTheme from Tokens
 
 on:
-  workflow_dispatch:  # Manual trigger
+  push:
+    branches: [main, master]
+    paths: ['tokens.json']  # Only trigger when tokens.json changes
+  workflow_dispatch:  # Still allow manual trigger
 
 jobs:
-  update-colors:
+  update-material-theme:
     runs-on: ubuntu-latest
 
     steps:
@@ -19,49 +22,174 @@ jobs:
       - name: Install requirements
         run: pip install json5
 
-      - name: Update Kotlin Color File
+      - name: Update MaterialTheme Colors
         run: |
-          python3 <<EOF
+          python3 <<'EOF'
           import json5
           import re
+          import os
 
-          # Load JSON file
+          # Load tokens.json file
           with open('tokens.json', 'r') as f:
-              colors = json5.load(f)
+              tokens = json5.load(f)
 
-          # Read the Kotlin file
-          file_path = 'capabilities/src/main/kotlin/com/mindstix/capabilities/presentation/theme/Colors.kt'
+          # Extract colors from tokens structure
+          def extract_colors(obj, path=""):
+              colors = {}
+              if isinstance(obj, dict):
+                  for key, value in obj.items():
+                      current_path = f"{path}_{key}" if path else key
+                      if isinstance(value, dict):
+                          if "value" in value and "type" in value and value["type"] == "color":
+                              # This is a color token
+                              colors[current_path.replace("-", "_")] = value["value"]
+                          else:
+                              # Recurse deeper
+                              colors.update(extract_colors(value, current_path))
+              return colors
 
-          if not os.path.exists(file_path):
-            with open(file_path, 'w') as f:
-              f.write('// Auto-generated color definitions\n\n')
-        
-          with open(file_path, 'r') as f:
-              kotlin_code = f.read()
+          # Extract all color tokens
+          all_colors = {}
+          if "global" in tokens:
+              all_colors.update(extract_colors(tokens["global"]))
+          if "Color & Spacing Tokens/Value" in tokens and "color" in tokens["Color & Spacing Tokens/Value"]:
+              color_tokens = tokens["Color & Spacing Tokens/Value"]["color"]
+              for color_group, shades in color_tokens.items():
+                  for shade, color_data in shades.items():
+                      if isinstance(color_data, dict) and "value" in color_data:
+                          key = f"{color_group}_{shade}".replace("-", "_")
+                          all_colors[key] = color_data["value"]
 
-          # Replace the colors
+          # Function to convert hex to Kotlin Color
           def hex_to_kotlin(hex_value):
               hex_value = hex_value.lstrip('#')
-              return f"Color(0xFF{hex_value.upper()})"
+              if len(hex_value) == 6:
+                  return f"Color(0xFF{hex_value.upper()})"
+              return hex_value
 
-          for key, hex_value in colors.items():
-              pattern = rf'(val\s+{key}\s*=\s*)Color\(0x[0-9A-Fa-f]+\)'
-              replacement = rf'\1{hex_to_kotlin(hex_value)}'
-              kotlin_code, count = re.subn(pattern, replacement, kotlin_code)
-              if count == 0:
-                  print(f"Warning: '{key}' not found in Kotlin file.")
+          # Update Color.kt file
+          color_file_path = 'app/src/main/java/com/example/tokentest/ui/theme/Color.kt'
+          
+          # Create a comprehensive color definitions file
+          color_definitions = []
+          color_definitions.append("package com.example.tokentest.ui.theme")
+          color_definitions.append("")
+          color_definitions.append("import androidx.compose.ui.graphics.Color")
+          color_definitions.append("")
+          color_definitions.append("// Auto-generated colors from tokens.json")
+          color_definitions.append("")
 
-          # Save the updated Kotlin file
-          with open(file_path, 'w') as f:
-              f.write(kotlin_code)
+          # Add primary colors from global tokens
+          primary_color = "#7d4dbe"  # Default from tokens
+          secondary_color = "#6436ab"  # Default from tokens
+          tertiary_color = "#e1251b"  # Default from tokens
+          
+          if "Background_section_primary" in all_colors:
+              primary_color = all_colors["Background_section_primary"]
+          if "Button_primary_hover_bg" in all_colors:
+              secondary_color = all_colors["Button_primary_hover_bg"]
+          if "Text_text_error" in all_colors:
+              tertiary_color = all_colors["Text_text_error"]
 
-          print("✅ Colors updated successfully.")
+          # Material 3 color scheme colors
+          color_definitions.append(f"// Material 3 Primary Colors")
+          color_definitions.append(f"val Primary = {hex_to_kotlin(primary_color)}")
+          color_definitions.append(f"val Secondary = {hex_to_kotlin(secondary_color)}")  
+          color_definitions.append(f"val Tertiary = {hex_to_kotlin(tertiary_color)}")
+          color_definitions.append("")
+
+          # Background colors
+          if "Background_surface_default" in all_colors:
+              color_definitions.append(f"val Surface = {hex_to_kotlin(all_colors['Background_surface_default'])}")
+          if "Background_surface_alt" in all_colors:
+              color_definitions.append(f"val SurfaceVariant = {hex_to_kotlin(all_colors['Background_surface_alt'])}")
+          
+          color_definitions.append("")
+          color_definitions.append("// Token-based colors")
+          
+          # Add all extracted colors as individual definitions
+          for color_name, hex_value in sorted(all_colors.items()):
+              safe_name = color_name.replace("-", "_").replace(".", "_")
+              # Capitalize first letter for Kotlin naming convention
+              safe_name = ''.join(word.capitalize() for word in safe_name.split('_'))
+              color_definitions.append(f"val {safe_name} = {hex_to_kotlin(hex_value)}")
+
+          # Write the new color file
+          with open(color_file_path, 'w') as f:
+              f.write('\n'.join(color_definitions))
+
+          print(f"✅ Updated {color_file_path} with {len(all_colors)} colors")
+
+          # Update Theme.kt to use the new colors
+          theme_file_path = 'app/src/main/java/com/example/tokentest/ui/theme/Theme.kt'
+          
+          if os.path.exists(theme_file_path):
+              with open(theme_file_path, 'r') as f:
+                  theme_content = f.read()
+
+              # Update the color scheme definitions
+              light_scheme_replacement = f"""private val LightColorScheme = lightColorScheme(
+    primary = Primary,
+    secondary = Secondary,
+    tertiary = Tertiary,
+    surface = Surface,
+    surfaceVariant = SurfaceVariant,
+    background = Surface,
+    onPrimary = Color.White,
+    onSecondary = Color.White,
+    onTertiary = Color.White,
+    onBackground = TextPrimary,
+    onSurface = TextPrimary
+)"""
+
+              dark_scheme_replacement = f"""private val DarkColorScheme = darkColorScheme(
+    primary = Primary,
+    secondary = Secondary,
+    tertiary = Tertiary,
+    surface = GrayN1000,
+    surfaceVariant = GrayN700,
+    background = GrayN1000,
+    onPrimary = Color.White,
+    onSecondary = Color.White,
+    onTertiary = Color.White,
+    onBackground = Color.White,
+    onSurface = Color.White
+)"""
+
+              # Replace the existing color schemes
+              theme_content = re.sub(
+                  r'private val LightColorScheme = lightColorScheme\([^)]*\)',
+                  light_scheme_replacement,
+                  theme_content,
+                  flags=re.DOTALL
+              )
+              
+              theme_content = re.sub(
+                  r'private val DarkColorScheme = darkColorScheme\([^)]*\)',
+                  dark_scheme_replacement,
+                  theme_content,
+                  flags=re.DOTALL
+              )
+
+              with open(theme_file_path, 'w') as f:
+                  f.write(theme_content)
+
+              print(f"✅ Updated {theme_file_path} with new color scheme")
+
+          print("🎨 MaterialTheme colors updated successfully from tokens.json!")
           EOF
 
       - name: Commit and push changes
         run: |
-          git config user.name "github-actions"
-          git config user.email "github-actions@github.com"
-          git add capabilities/src/main/kotlin/com/mindstix/capabilities/presentation/theme/Colors.kt
-          git commit -m "Update Colors from JSON"
-          git push
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add app/src/main/java/com/example/tokentest/ui/theme/Color.kt
+          git add app/src/main/java/com/example/tokentest/ui/theme/Theme.kt
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "🎨 Update MaterialTheme colors from tokens.json
+
+            Auto-generated color definitions and theme updates based on design tokens."
+            git push
+          fi
