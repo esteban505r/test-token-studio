@@ -44,7 +44,7 @@ jobs:
               for color_family, shades in color_tokens.items():
                   if isinstance(shades, dict):
                       for shade, color_data in shades.items():
-                          if isinstance(color_data, dict) and 'value' in color_data:
+                          if isinstance(color_data, dict) and 'value' in color_data and color_data.get('type') == 'color':
                               key = f"{color_family}_{shade}"
                               color_variations[key] = str(color_data['value'])
           
@@ -77,11 +77,20 @@ jobs:
           
           # Extract typography values
           font_sizes = {}
+          font_families = {}
+          line_heights = {}
+          
           if 'Typography/Mode 1' in tokens:
-              font_tokens = tokens['Typography/Mode 1']
-              for key, font_data in font_tokens.items():
-                  if isinstance(font_data, dict) and 'value' in font_data:
-                      font_sizes[key] = str(font_data['value'])
+              typography_tokens = tokens['Typography/Mode 1']
+              for key, token_data in typography_tokens.items():
+                  if isinstance(token_data, dict) and 'value' in token_data:
+                      token_type = token_data.get('type', '')
+                      if token_type == 'fontSizes':
+                          font_sizes[key] = str(token_data['value'])
+                      elif token_type == 'fontFamilies':
+                          font_families[key] = str(token_data['value'])
+                      elif token_type == 'lineHeights':
+                          line_heights[key] = str(token_data['value'])
           
           # Create color file
           color_content = "package com.example.tokentest.ui.theme\n\n"
@@ -137,13 +146,27 @@ jobs:
           
           # Create typography file
           typography_content = "package com.example.tokentest.ui.theme\n\n"
+          typography_content += "import androidx.compose.ui.text.font.FontFamily\n"
+          typography_content += "import androidx.compose.ui.text.font.FontWeight\n"
           typography_content += "import androidx.compose.ui.unit.sp\n\n"
-          typography_content += "// Auto-generated typography from tokens.json\n"
+          typography_content += "// Auto-generated typography from tokens.json\n\n"
+          
+          # Add font families
+          typography_content += "// Font Families\n"
+          for family_name, font_value in sorted(font_families.items()):
+              safe_name = family_name.replace("-", "").replace("_", "").capitalize()
+              typography_content += f"val FontFamily{safe_name} = FontFamily.Default\n"
           
           # Add font sizes
+          typography_content += "\n// Font Sizes\n"
           for key, sp_value in sorted(font_sizes.items()):
               if key.isdigit() and int(key) < 20:  # Only include reasonable font sizes
                   typography_content += "val FontSize" + key + " = " + sp_value + ".sp\n"
+          
+          # Add line heights
+          typography_content += "\n// Line Heights\n"
+          for key, line_height in sorted(line_heights.items()):
+              typography_content += "val LineHeight" + key + " = " + line_height + ".sp\n"
           
           typography_content += "\n// Common typography shortcuts\n"
           typography_content += "val HeadingLarge = FontSize0\n"
@@ -197,6 +220,8 @@ jobs:
           print(f"🎨 Found {len(color_variations)} color variations")
           print(f"📐 Found {len(border_radius_values)} border radius tokens")
           print(f"🔤 Found {len(font_sizes)} typography tokens")
+          print(f"📝 Found {len(font_families)} font families")
+          print(f"📏 Found {len(line_heights)} line heights")
           EOF
 
       - name: Commit changes
