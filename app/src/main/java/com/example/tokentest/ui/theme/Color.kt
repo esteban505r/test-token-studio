@@ -3,7 +3,7 @@ package com.example.tokentest.ui.theme
 import androidx.compose.ui.graphics.Color
 
 // Auto-generated from tokens.json
-val Primary = Color(0xFF00e4f4)
+val Primary = Color(0xFF7d4dbe)
 val Secondary = Color(0xFF6436ab)
 val ErrorColor = Color(0xFFe1251b)
 val Surface = Color(0xFFffffff)
@@ -59,7 +59,7 @@ val Purple200 = Color(0xFFcdbfea)
 val Purple300 = Color(0xFFaf96e3)
 val Purple400 = Color(0xFF845ed1)
 val Purple50 = Color(0xFFefe9ff)
-val Purple500 = Color(0xFF00e4f4)
+val Purple500 = Color(0xFF7d4dbe)
 val Purple600 = Color(0xFF6436ab)
 val Purple700 = Color(0xFF471f86)
 val Purple800 = Color(0xFF2d0865)
