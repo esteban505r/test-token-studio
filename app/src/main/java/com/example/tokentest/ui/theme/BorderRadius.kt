@@ -6,5 +6,3 @@ import androidx.compose.ui.unit.dp
 val BorderRadiusSmall = 7.dp
 val BorderRadiusMedium = 15.dp
 val BorderRadiusLarge = 30.dp
-
-
