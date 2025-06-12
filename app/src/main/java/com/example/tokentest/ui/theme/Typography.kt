@@ -9,6 +9,11 @@ import androidx.compose.ui.unit.sp
 // Font Families
 
 // Font Sizes
+val FontSize0 = 32.sp
+val FontSize2 = 24.sp
+val FontSize14 = 16.sp
+val FontSize16 = 14.sp
+val FontSize18 = 12.sp
 
 // Line Heights
 
