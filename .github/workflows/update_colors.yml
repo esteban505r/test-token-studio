@@ -32,39 +32,28 @@ jobs:
           python3 << 'EOF'
           import json5
           import os
-          
+
           # Load tokens
           with open('tokens.json', 'r') as f:
               tokens = json5.load(f)
           
-          # Extract basic colors
-          primary_color = "#7d4dbe"
-          secondary_color = "#6436ab" 
-          error_color = "#e1251b"
-          surface_color = "#ffffff"
-          background_color = "#f6f6f6"
+          # Extract colors from the new structure
+          color_variations = {}
+          if 'Colors/Mode 1' in tokens:
+              color_tokens = tokens['Colors/Mode 1']
+              for color_family, shades in color_tokens.items():
+                  if isinstance(shades, dict):
+                      for shade, color_data in shades.items():
+                          if isinstance(color_data, dict) and 'value' in color_data:
+                              key = f"{color_family}_{shade}"
+                              color_variations[key] = color_data['value']
           
-          if 'global' in tokens:
-              global_tokens = tokens['global']
-              
-              # Get primary colors
-              if 'Background' in global_tokens and 'section-primary' in global_tokens['Background']:
-                  primary_color = global_tokens['Background']['section-primary']['value']
-              
-              if 'Button' in global_tokens and 'primary' in global_tokens['Button']:
-                  if 'hover-bg' in global_tokens['Button']['primary']:
-                      secondary_color = global_tokens['Button']['primary']['hover-bg']['value']
-              
-              # Get surface colors
-              if 'Background' in global_tokens:
-                  if 'surface-default' in global_tokens['Background']:
-                      surface_color = global_tokens['Background']['surface-default']['value']
-                  if 'surface-alt' in global_tokens['Background']:
-                      background_color = global_tokens['Background']['surface-alt']['value']
-              
-              # Get error color
-              if 'Text' in global_tokens and 'text-error' in global_tokens['Text']:
-                  error_color = global_tokens['Text']['text-error']['value']
+          # Set default colors
+          primary_color = color_variations.get('purple_500', '#7d4dbe')
+          secondary_color = color_variations.get('purple_600', '#6436ab')
+          error_color = color_variations.get('red_500', '#e1251b')
+          surface_color = color_variations.get('neutral_0', '#ffffff')
+          background_color = color_variations.get('neutral_100', '#f6f6f6')
           
           # Extract spacing values
           spacing_values = {}
@@ -86,26 +75,15 @@ jobs:
                       value = int(token['value'])
                       border_radius_values[key] = value
           
-          # Extract color variations
-          color_variations = {}
-          if 'Colors/Mode 1' in tokens:
-              color_tokens = tokens['Colors/Mode 1']
-              for color_group, shades in color_tokens.items():
-                  if isinstance(shades, dict):
-                      for shade, color_data in shades.items():
-                          if isinstance(color_data, dict) and 'value' in color_data:
-                              key = f"{color_group}_{shade}"
-                              color_variations[key] = color_data['value']
-          
           # Extract typography values
           font_sizes = {}
-          if 'global' in tokens and 'fontSize' in tokens['global']:
-              font_tokens = tokens['global']['fontSize']
+          if 'Typography/Mode 1' in tokens:
+              font_tokens = tokens['Typography/Mode 1']
               for key, font_data in font_tokens.items():
                   if isinstance(font_data, dict) and 'value' in font_data:
                       font_sizes[key] = font_data['value']
           
-          # Create simple color file
+          # Create color file
           color_content = "package com.example.tokentest.ui.theme\n\n"
           color_content += "import androidx.compose.ui.graphics.Color\n\n"
           color_content += "// Auto-generated from tokens.json\n"
