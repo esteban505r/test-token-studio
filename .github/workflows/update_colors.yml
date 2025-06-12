@@ -46,7 +46,7 @@ jobs:
                       for shade, color_data in shades.items():
                           if isinstance(color_data, dict) and 'value' in color_data:
                               key = f"{color_family}_{shade}"
-                              color_variations[key] = color_data['value']
+                              color_variations[key] = str(color_data['value'])
           
           # Set default colors
           primary_color = color_variations.get('purple_500', '#7d4dbe')
@@ -81,7 +81,7 @@ jobs:
               font_tokens = tokens['Typography/Mode 1']
               for key, font_data in font_tokens.items():
                   if isinstance(font_data, dict) and 'value' in font_data:
-                      font_sizes[key] = font_data['value']
+                      font_sizes[key] = str(font_data['value'])
           
           # Create color file
           color_content = "package com.example.tokentest.ui.theme\n\n"
