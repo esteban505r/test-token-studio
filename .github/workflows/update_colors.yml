@@ -159,9 +159,26 @@ jobs:
           
           # Add font sizes
           typography_content += "\n// Font Sizes\n"
-          for key, sp_value in sorted(font_sizes.items()):
-              if key.isdigit() and int(key) < 20:  # Only include reasonable font sizes
-                  typography_content += "val FontSize" + key + " = " + sp_value + ".sp\n"
+          # Create default font sizes if none exist
+          default_font_sizes = {
+              "0": "32",  # HeadingLarge
+              "2": "24",  # HeadingMedium
+              "14": "16", # BodyLarge
+              "16": "14", # BodyMedium
+              "18": "12"  # BodySmall
+          }
+          
+          # Use provided font sizes or defaults
+          for key, size in default_font_sizes.items():
+              if key in font_sizes:
+                  typography_content += f"val FontSize{key} = {font_sizes[key]}.sp\n"
+              else:
+                  typography_content += f"val FontSize{key} = {size}.sp\n"
+          
+          # Add any additional font sizes from tokens
+          for key, size in font_sizes.items():
+              if key not in default_font_sizes:
+                  typography_content += f"val FontSize{key} = {size}.sp\n"
           
           # Add line heights
           typography_content += "\n// Line Heights\n"
